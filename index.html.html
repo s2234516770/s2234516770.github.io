@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>宿舍智能分配系统</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #7209b7;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --success: #4cc9f0;
+            --warning: #f72585;
+            --info: #4895ef;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .description {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 20px;
+        }
+        
+        .form-section, .results-section {
+            flex: 1;
+            min-width: 300px;
+            padding: 25px;
+        }
+        
+        .form-section {
+            border-right: 1px solid #eee;
+        }
+        
+        h2 {
+            color: var(--secondary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eaeaea;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        
+        button {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .student-list {
+            margin-top: 30px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .student-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .dormitory {
+            margin-top: 30px;
+            background: #e8f4fc;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+        
+        .dorm-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #b8d4f0;
+        }
+        
+        .dorm-title {
+            font-size: 1.3rem;
+            color: var(--secondary);
+            font-weight: 600;
+        }
+        
+        .match-rate {
+            background: var(--primary);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .dorm-members {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .member {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .member-name {
+            font-weight: 600;
+            color: var(--secondary);
+            margin-bottom: 10px;
+        }
+        
+        .member-details {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 4px;
+        }
+        
+        .compatibility {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: var(--primary);
+        }
+        
+        .share-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+        
+        .share-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .share-btn {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        
+        .share-btn:hover {
+            background: #f0f0f0;
+            transform: translateY(-2px);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+        }
+        
+        @media (max-width: 768px) {
+            .form-section {
+                border-right: none;
+                border-bottom: 1px solid #eee;
+            }
+            
+            .main-content {
+                flex-direction: column;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>宿舍智能分配系统</h1>
+            <p class="description">根据专业、作息时间和生活习惯智能分配宿舍，创造最佳住宿环境</p>
+        </header>
+        
+        <div class="main-content">
+            <section class="form-section">
+                <h2>学生信息登记</h2>
+                <form id="studentForm">
+                    <div class="form-group">
+                        <label for="name">姓名</label>
+                        <input type="text" id="name" required placeholder="请输入您的姓名">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="gender">性别</label>
+                        <select id="gender" required>
+                            <option value="">请选择性别</option>
+                            <option value="男">男</option>
+                            <option value="女">女</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="major">专业</label>
+                        <select id="major" required>
+                            <option value="">请选择专业</option>
+                            <option value="计算机科学">计算机科学</option>
+                            <option value="电子工程">电子工程</option>
+                            <option value="机械工程">机械工程</option>
+                            <option value="工商管理">工商管理</option>
+                            <option value="金融学">金融学</option>
+                            <option value="外国语文学">外国语文学</option>
+                            <option value="建筑设计">建筑设计</option>
+                            <option value="医学">医学</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="wakeupTime">通常起床时间</label>
+                        <select id="wakeupTime" required>
+                            <option value="">请选择起床时间</option>
+                            <option value="6:00">6:00</option>
+                            <option value="6:30">6:30</option>
+                            <option value="7:00">7:00</option>
+                            <option value="7:30">7:30</option>
+                            <option value="8:00">8:00</option>
+                            <option value="8:30">8:30</option>
+                            <option value="9:00">9:00</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="bedtime">通常睡觉时间</label>
+                        <select id="bedtime" required>
+                            <option value="">请选择睡觉时间</option>
+                            <option value="22:00">22:00</option>
+                            <option value="22:30">22:30</option>
+                            <option value="23:00">23:00</option>
+                            <option value="23:30">23:30</option>
+                            <option value="24:00">24:00</option>
+                            <option value="24:30">24:30</option>
+                            <option value="1:00">1:00</option>
+                            <option value="2:00">2:00</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="showerFrequency">洗澡频率（次/周）</label>
+                        <select id="showerFrequency" required>
+                            <option value="">请选择洗澡频率</option>
+                            <option value="3">3次</option>
+                            <option value="4">4次</option>
+                            <option value="5">5次</option>
+                            <option value="6">6次</option>
+                            <option value="7">7次</option>
+                            <option value="8">8次</option>
+                            <option value="9">9次</option>
+                            <option value="10">10次</option>
+                            <option value="14">14次（每天2次）</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cleanliness">整洁度要求</label>
+                        <select id="cleanliness" required>
+                            <option value="">请选择整洁度要求</option>
+                            <option value="1">非常随意</option>
+                            <option value="2">比较随意</option>
+                            <option value="3">一般</option>
+                            <option value="4">比较爱干净</option>
+                            <option value="5">洁癖</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit">提交信息</button>
+                </form>
+                
+                <div class="student-list">
+                    <h3>已登记学生</h3>
+                    <div id="studentsContainer"></div>
+                </div>
+            </section>
+            
+            <section class="results-section">
+                <h2>宿舍分配结果</h2>
+                <button id="allocateBtn" style="margin-bottom: 20px;">开始分配宿舍</button>
+                
+                <div id="dormitoriesContainer"></div>
+                
+                <div class="share-section">
+                    <h3>分享与部署指南</h3>
+                    <p>要分享此系统并收集数据，您需要：</p>
+                    <ol>
+                        <li>将网页部署到网络服务器</li>
+                        <li>或使用GitHub Pages免费托管</li>
+                        <li>或使用表单收集服务如Google Forms</li>
+                    </ol>
+                    
+                    <div class="share-options">
+                        <button class="share-btn" onclick="copyLink()">
+                            <span>复制链接</span>
+                        </button>
+                        <button class="share-btn" onclick="downloadHTML()">
+                            <span>下载HTML文件</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+        
+        <footer>
+            <p>© 2023 宿舍智能分配系统 | 设计用于优化学生宿舍分配体验</p>
+        </footer>
+    </div>
+
+    <script>
+        // 存储学生数据的数组
+        let students = JSON.parse(localStorage.getItem('dormStudents')) || [];
+        
+        // 表单提交事件
+        document.getElementById('studentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const student = {
+                id: Date.now(), // 使用时间戳作为唯一ID
+                name: document.getElementById('name').value,
+                gender: document.getElementById('gender').value,
+                major: document.getElementById('major').value,
+                wakeupTime: document.getElementById('wakeupTime').value,
+                bedtime: document.getElementById('bedtime').value,
+                showerFrequency: document.getElementById('showerFrequency').value,
+                cleanliness: document.getElementById('cleanliness').value
+            };
+            
+            students.push(student);
+            localStorage.setItem('dormStudents', JSON.stringify(students));
+            
+            // 更新显示
+            renderStudentList();
+            this.reset();
+        });
+        
+        // 分配宿舍按钮事件
+        document.getElementById('allocateBtn').addEventListener('click', function() {
+            allocateDormitories();
+        });
+        
+        // 渲染学生列表
+        function renderStudentList() {
+            const container = document.getElementById('studentsContainer');
+            container.innerHTML = '';
+            
+            if (students.length === 0) {
+                container.innerHTML = '<p>尚无学生登记</p>';
+                return;
+            }
+            
+            students.forEach(student => {
+                const div = document.createElement('div');
+                div.className = 'student-item';
+                div.innerHTML = `
+                    <strong>${student.name}</strong> (${student.gender}, ${student.major})<br>
+                    起床: ${student.wakeupTime}, 睡觉: ${student.bedtime}<br>
+                    洗澡: ${student.showerFrequency}次/周, 整洁度: ${'★'.repeat(student.cleanliness)}
+                `;
+                container.appendChild(div);
+            });
+        }
+        
+        // 分配宿舍算法
+        function allocateDormitories() {
+            if (students.length < 4) {
+                alert('至少需要4名学生才能分配宿舍');
+                return;
+            }
+            
+            // 按专业和性别分组
+            const groups = {};
+            students.forEach(student => {
+                const key = `${student.major}-${student.gender}`;
+                if (!groups[key]) {
+                    groups[key] = [];
+                }
+                groups[key].push(student);
+            });
+            
+            // 对每个专业性别组进行分配
+            const dormitories = [];
+            
+            for (const key in groups) {
+                const group = groups[key];
+                if (group.length < 4) {
+                    console.warn(`专业性别组 ${key} 人数不足4人，无法分配完整宿舍`);
+                    continue;
+                }
+                
+                // 按作息时间和生活习惯排序，使相似的学生分在一起
+                group.sort((a, b) => {
+                    // 计算起床时间差异（转换为分钟）
+                    const aWakeup = convertTimeToMinutes(a.wakeupTime);
+                    const bWakeup = convertTimeToMinutes(b.wakeupTime);
+                    
+                    // 计算睡觉时间差异
+                    const aBedtime = convertTimeToMinutes(a.bedtime);
+                    const bBedtime = convertTimeToMinutes(b.bedtime);
+                    
+                    // 计算洗澡频率差异
+                    const showerDiff = Math.abs(a.showerFrequency - b.showerFrequency);
+                    
+                    // 计算整洁度差异
+                    const cleanDiff = Math.abs(a.cleanliness - b.cleanliness);
+                    
+                    // 综合差异评分（数值越小越相似）
+                    return (Math.abs(aWakeup - bWakeup) + Math.abs(aBedtime - bBedtime) + showerDiff * 10 + cleanDiff * 5);
+                });
+                
+                // 将学生分组，每组4人
+                for (let i = 0; i < group.length; i += 4) {
+                    if (i + 4 <= group.length) {
+                        dormitories.push({
+                            id: dormitories.length + 1,
+                            major: group[i].major,
+                            gender: group[i].gender,
+                            members: group.slice(i, i + 4),
+                            compatibility: calculateCompatibility(group.slice(i, i + 4))
+                        });
+                    }
+                }
+            }
+            
+            // 渲染宿舍分配结果
+            renderDormitories(dormitories);
+        }
+        
+        // 将时间字符串转换为分钟数
+        function convertTimeToMinutes(timeStr) {
+            const [hours, minutes] = timeStr.split(':').map(Number);
+            return hours * 60 + (minutes || 0);
+        }
+        
+        // 计算宿舍兼容性评分
+        function calculateCompatibility(members) {
+            let totalScore = 0;
+            const count = members.length;
+            
+            // 计算起床时间平均差
+            let wakeupDiff = 0;
+            // 计算睡觉时间平均差
+            let bedtimeDiff = 0;
+            // 计算洗澡频率平均差
+            let showerDiff = 0;
+            // 计算整洁度平均差
+            let cleanlinessDiff = 0;
+            
+            for (let i = 0; i < count; i++) {
+                for (let j = i + 1; j < count; j++) {
+                    wakeupDiff += Math.abs(convertTimeToMinutes(members[i].wakeupTime) - convertTimeToMinutes(members[j].wakeupTime));
+                    bedtimeDiff += Math.abs(convertTimeToMinutes(members[i].bedtime) - convertTimeToMinutes(members[j].bedtime));
+                    showerDiff += Math.abs(members[i].showerFrequency - members[j].showerFrequency);
+                    cleanlinessDiff += Math.abs(members[i].cleanliness - members[j].cleanliness);
+                }
+            }
+            
+            // 归一化并计算总分（0-100分，越高越兼容）
+            const pairs = (count * (count - 1)) / 2;
+            const maxWakeupDiff = 720; // 最大可能起床时间差（12小时）
+            const maxBedtimeDiff = 720; // 最大可能睡觉时间差（12小时）
+            const maxShowerDiff = 10; // 最大洗澡频率差
+            const maxCleanlinessDiff = 4; // 最大整洁度差
+            
+            const wakeupScore = 100 * (1 - wakeupDiff / pairs / maxWakeupDiff);
+            const bedtimeScore = 100 * (1 - bedtimeDiff / pairs / maxBedtimeDiff);
+            const showerScore = 100 * (1 - showerDiff / pairs / maxShowerDiff);
+            const cleanlinessScore = 100 * (1 - cleanlinessDiff / pairs / maxCleanlinessDiff);
+            
+            // 加权平均
+            totalScore = wakeupScore * 0.3 + bedtimeScore * 0.3 + showerScore * 0.2 + cleanlinessScore * 0.2;
+            
+            return Math.round(totalScore);
+        }
+        
+        // 渲染宿舍分配结果
+        function renderDormitories(dormitories) {
+            const container = document.getElementById('dormitoriesContainer');
+            container.innerHTML = '';
+            
+            if (dormitories.length === 0) {
+                container.innerHTML = '<p>无法分配完整宿舍，请添加更多学生</p>';
+                return;
+            }
+            
+            dormitories.forEach(dorm => {
+                const dormElement = document.createElement('div');
+                dormElement.className = 'dormitory';
+                
+                let membersHTML = '';
+                dorm.members.forEach(member => {
+                    membersHTML += `
+                        <div class="member">
+                            <div class="member-name">${member.name}</div>
+                            <div class="member-details">
+                                起床: ${member.wakeupTime}<br>
+                                睡觉: ${member.bedtime}<br>
+                                洗澡: ${member.showerFrequency}次/周<br>
+                                整洁度: ${'★'.repeat(member.cleanliness)}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                dormElement.innerHTML = `
+                    <div class="dorm-header">
+                        <span class="dorm-title">${dorm.major}专业 - ${dorm.gender}生宿舍 ${dorm.id}</span>
+                        <span class="match-rate">匹配度: ${dorm.compatibility}%</span>
+                    </div>
+                    <div class="dorm-members">
+                        ${membersHTML}
+                    </div>
+                    <div class="compatibility">
+                        <div class="progress-bar">
+                            <div class="progress" style="width: ${dorm.compatibility}%"></div>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(dormElement);
+            });
+        }
+        
+        // 复制链接功能
+        function copyLink() {
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = window.location.href;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+            alert('链接已复制到剪贴板！');
+        }
+        
+        // 下载HTML文件功能
+        function downloadHTML() {
+            const htmlContent = `<!DOCTYPE html>${document.documentElement.outerHTML}`;
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'dormitory-allocation-system.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // 初始化页面
+        renderStudentList();
+    </script>
+</body>
+</html>
